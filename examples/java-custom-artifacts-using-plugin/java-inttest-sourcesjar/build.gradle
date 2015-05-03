@@ -1,0 +1,42 @@
+apply plugin: 'java'
+apply plugin: 'groovy'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+   testCompile "junit:junit:4.12"
+}
+
+sourceSets {
+    integTest {
+        groovy.srcDir file('src/integTest/groovy')
+        resources.srcDir file('src/integTest/resources')
+    }
+}
+
+task integTest(type:Test) {
+    testClassesDir = sourceSets.integTest.output.classesDir
+    classpath = sourceSets.integTest.runtimeClasspath
+}
+check.dependsOn(integTest)
+
+configurations {
+    integTestCompile
+    integTestRuntime
+}
+dependencies {
+    integTestCompile 'org.codehaus.groovy:groovy:2.4.3'
+    integTestCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+        exclude group: 'org.codehaus.groovy'
+    }
+    integTestCompile files(jar.archivePath)
+}
+
+// tag::task_sourcesjar[]
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+// end::task_sourcesjar[]

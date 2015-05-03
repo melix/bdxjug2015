@@ -1,0 +1,28 @@
+// tag::minimal_build[]
+apply plugin: 'groovy'
+
+group = 'com.acme.gradle'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.3'
+}
+// end::minimal_build[]
+
+// tag::publish[]
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+// end::publish[]

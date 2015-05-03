@@ -1,0 +1,60 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.2'
+        classpath 'com.github.jruby-gradle:jruby-gradle-plugin:0.1.5'
+        classpath 'org.ysb33r.gradle:vfs-gradle-plugin:1.0-beta1'
+        classpath 'commons-httpclient:commons-httpclient:3.1'
+    }
+
+}
+
+// tag::example_apply[]
+repositories {
+    jcenter()
+}
+
+apply plugin: 'com.github.jruby-gradle.base'
+apply plugin: 'org.ysb33r.vfs'
+apply plugin: 'java'
+apply plugin: 'org.asciidoctor.convert'
+
+dependencies {
+    gems 'rubygems:haml:4.0.6'
+}
+// end::example_apply[]
+
+ext {
+    revealjsVersion = '2.6.2'
+    deckjsVersion = 'master'
+    asciidoctorBackendVersion = 'master'
+    downloadDir = new File(buildDir, 'download')
+    templateDir = new File(downloadDir, 'templates')
+    deckjsDir = new File(downloadDir, 'deck.js')
+}
+
+apply from: 'gradle/pdf.gradle'
+
+task download {
+    doLast {
+        mkdir downloadDir
+        vfs {
+            // deck.js
+            cp "zip:https://github.com/asciidoctor/asciidoctor-backends/archive/${asciidoctorBackendVersion}.zip!asciidoctor-backends-${asciidoctorBackendVersion}",
+                    templateDir, recursive: true, overwrite: true
+            cp "zip:https://github.com/imakewebthings/deck.js/archive/${deckjsVersion}.zip!deck.js-${deckjsVersion}",
+                    deckjsDir, recursive: true, overwrite: true
+        }
+    }
+}
+
+download {
+    description "Download extra deckjs/reveal.js resources"
+    outputs.dir templateDir
+    outputs.dir deckjsDir
+}
+
+apply from: 'gradle/asciidoctor.gradle'

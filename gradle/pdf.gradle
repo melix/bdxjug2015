@@ -1,0 +1,20 @@
+configurations {
+    pdf
+}
+repositories {
+    mavenLocal()
+}
+dependencies {
+    pdf 'com.github.melix:deck2pdf:0.2'
+}
+
+task generatePdf(type:JavaExec) {
+    dependsOn asciidoctor
+    main = 'me.champeau.deck2pdf.Main'
+    workingDir = file("$buildDir/asciidoc/deckjs")
+    args = ['gradle-coc.html','gradle-coc.pdf']
+    classpath = configurations.pdf
+
+    inputs.file("$workingDir/gradle-coc.html")
+    outputs.file("$workingDir/gradle-coc.pdf")
+}

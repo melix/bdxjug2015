@@ -1,0 +1,13 @@
+rootProject.name = 'bdxjug2015'
+
+new File('examples').eachFile {
+   if (it.directory) {
+      include it.name
+   }
+}
+
+
+rootProject.children.each {project ->
+    String projectDirName = "examples/${project.name}"
+    project.projectDir = new File(settingsDir, projectDirName)
+}

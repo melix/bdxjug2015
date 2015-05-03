@@ -1,0 +1,330 @@
+= Convention over configuration: the Gradle way
+Cédric Champeau <cchampeau@gradleware.com>
+2015-05-05
+:revnumber: {project-version}
+:example-caption!:
+ifndef::imagesdir[:imagesdir: images]
+ifndef::sourcedir[:sourcedir: ../java]
+:deckjs_transition: fade
+:navigation:
+:menu:
+:goto:
+:status:
+:adoctor: http://asciidoctor.org/[Asciidoctor]
+:gradle: http://gradle.org[Gradle]
+:deckjs: http://imakewebthings.com/deck.js/[deck.js]
+:deck2pdf: https://github.com/melix/deck2pdf[deck2pdf]
+
+== Who am I
+
+[cols="4a,1a"]
+|===
+|[source,groovy]
+----
+speaker {
+    name 'Cédric Champeau'
+    company 'Gradle Inc'
+    oss 'Apache Groovy committer',
+    successes (['Static type checker',
+                    'Static compilation',
+                    'Traits',
+                    'Markup template engine',
+                    'DSLs'])
+        failures Stream.of(bugs),
+        twitter '@CedricChampeau',
+        github 'melix',
+        extraDescription '''Groovy in Action 2 co-author
+Misc OSS contribs (Gradle plugins, deck2pdf, jlangdetect, ...)'''
+}
+----
+|image::GradleLogoReg.png[]
+image::groovy-logo.png[]
+
+|===
+
+== Gradle
+
+* A dependency management engine
+* A dependency based execution system
+* A plugin system
+* A set of plugins
+
+== About this slidedeck
+
+* Slides written using {adoctor}
+* Converted to {deckjs}
+* Integrated with {gradle}
+* Exported to PDF thanks to {deck2pdf}
+
+[source,groovy]
+----
+include::{basedir}/build.gradle[tags=example_apply]
+----
+
+== Export to PDF
+
+[source,groovy]
+----
+include::{basedir}/gradle/pdf.gradle[]
+----
+
+== Gradle basics
+
+* build scripts (often _build.gradle_)
+* a task execution graph
+* inline "plugins"
+* binary plugins
+* plugin portal
+* Gradle wrapper
+
+== Gradle basics
+
+[[gettysburg]]
+[quote, inspired by Moshe Feldenkrais]
+____
+Make the impossible possible, +
+make the possible easy +
+and make the easy elegant
+____
+
+== Convention over configuration
+
+[source,groovy]
+.A simple Java project
+----
+include::{examples}/basic-java/build.gradle[]
+----
+
+== Convention over configuration
+
+.Before build
+----
+basic-java
+├── build.gradle
+└── src
+    ├── main
+    │   └── java
+    │       └── com
+    │           └── acme
+    │               └── Greeter.java
+    └── test
+        └── java
+            └── com
+                └── acme
+                    └── GreeterTest.java
+----
+
+== Convention over configuration
+
+.After build
+----
+basic-java/
+├── build
+│   ├── classes
+│   │   ├── main
+│   │   │   └── com
+│   │   │       └── acme
+│   │   │           └── Greeter.class
+│   │   └── test
+│   │       └── com
+│   │           └── acme
+│   │               └── GreeterTest.class
+│   ├── libs
+│   │   └── basic-java.jar
+│   ├── reports
+│   ├── test-results
+│   └── tmp
+├── build.gradle
+└── src
+    ...
+----
+
+== Integration tests
+
+What conventions exist for defining integration tests?
+
+=== Defining a new source set
+
+[source,groovy]
+----
+include::{examples}/java-inttest/build.gradle[tags=add_sourceset]
+----
+
+=== Create an integTest task
+
+[source,groovy]
+----
+include::{examples}/java-inttest/build.gradle[tags=inttest_task]
+----
+
+=== Define the integration test classpath
+
+[source,groovy]
+----
+include::{examples}/java-inttest/build.gradle[tags=configurations]
+----
+
+== Write the integration test
+
+[source,groovy]
+----
+include::{examples}/java-inttest/src/integTest/groovy/com/acme/GreetingSpec.groovy[]
+----
+
+=== Run it
+
+----
+$ ./gradlew --daemon j-i:iT
+:java-inttest:compileJava
+:java-inttest:compileGroovy UP-TO-DATE
+:java-inttest:processResources UP-TO-DATE
+:java-inttest:classes
+:java-inttest:jar
+:java-inttest:compileIntegTestJava UP-TO-DATE
+:java-inttest:compileIntegTestGroovy
+:java-inttest:processIntegTestResources UP-TO-DATE
+:java-inttest:integTestClasses
+:java-inttest:integTest
+
+BUILD SUCCESSFUL
+
+Total time: 3.646 secs
+----
+
+== Creating a source jar
+
+[source,groovy]
+----
+include::{examples}/java-inttest-sourcesjar/build.gradle[tags=task_sourcesjar]
+----
+
+== What about other source trees?
+
+=== Building a custom convention
+
+[source,groovy]
+----
+include::{examples}/java-custom-artifacts/build.gradle[tags=custom_artifacts]
+----
+
+=== Output directory
+
+----
+examples/java-custom-artifacts/build/libs/
+├── java-custom-artifacts-integTest-sources.jar
+├── java-custom-artifacts-sources.jar
+└── java-custom-artifacts-test-sources.jar
+----
+
+=== Can we make it cleaner?
+
+* How about sharing it with other sub-projects?
+* How about sharing it with external projects?
+
+== Writing a plugin
+
+* Usually written in Groovy
+* Can be written in Java
+* Other languages not recommended (adds dependencies)
+
+=== Plugin structure
+
+image::plugin-structure.png[]
+
+== build.gradle
+
+[source,groovy]
+----
+include::{examples}/plugin-custom-artifacts/build.gradle[tags=minimal_build]
+----
+
+== Writing a plugin
+
+=== Plugin class
+
+[source,groovy]
+----
+class SourcesJarPlugin implements Plugin<Project> {
+    @Override
+    void apply(Project project) {
+        // do something
+    }
+}
+----
+
+=== Descriptor
+
+[source]
+.src/main/resources/META-INF/gradle-plugins/com.acme.sourcesjar.properties
+----
+include::{examples}/plugin-custom-artifacts/src/main/resources/META-INF/gradle-plugins/com.acme.sourcesjar.properties[]
+----
+
+== Plugin code
+
+[source,groovy]
+.SourcesJarPlugin.groovy
+----
+include::{examples}/plugin-custom-artifacts/src/main/groovy/com/acme/SourcesJarPlugin.groovy[tags=main_body]
+----
+
+== Test the plugin
+
+[source,groovy]
+.SourcesJarPluginTest.groovy
+----
+include::{examples}/plugin-custom-artifacts/src/test/groovy/com/acme/SourcesJarPluginTest.groovy[tags=plugin_test,indent=0]
+----
+
+== Publishing the plugin
+
+=== The maven-publish plugin
+
+[source,groovy]
+----
+include::{examples}/plugin-custom-artifacts/build.gradle[tags=publish]
+----
+
+=== Publish to local repo
+
+----
+$ ./gradlew --daemon publishToMavenLocal
+:plugin-custom-artifacts:generatePomFileForMavenJavaPublication
+:plugin-custom-artifacts:compileJava UP-TO-DATE
+:plugin-custom-artifacts:compileGroovy
+:plugin-custom-artifacts:processResources
+:plugin-custom-artifacts:classes
+:plugin-custom-artifacts:jar
+:plugin-custom-artifacts:publishMavenJavaPublicationToMavenLocal
+:plugin-custom-artifacts:publishToMavenLocal
+
+BUILD SUCCESSFUL
+
+Total time: 2.011 secs
+----
+
+== Use the plugin
+
+[source,groovy]
+----
+include::{examples}/java-custom-artifacts-using-plugin/build.gradle[tags=use_plugin]
+----
+
+=== Output
+
+----
+$ ./gradlew sourcesJar
+:java-custom-artifacts:integTestSourcesJar UP-TO-DATE
+:java-custom-artifacts:mainSourcesJar UP-TO-DATE
+:java-custom-artifacts:testSourcesJar UP-TO-DATE
+:java-custom-artifacts:sourcesJar UP-TO-DATE
+:java-custom-artifacts-using-plugin:integTestSourcesJar
+:java-custom-artifacts-using-plugin:mainSourcesJar
+:java-custom-artifacts-using-plugin:testSourcesJar
+:java-custom-artifacts-using-plugin:sourcesJar
+:java-inttest-sourcesjar:sourcesJar UP-TO-DATE
+
+BUILD SUCCESSFUL
+
+Total time: 0.704 secs
+----
