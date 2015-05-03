@@ -1,0 +1,13 @@
+/*
+// tag::checksum_simple[]
+allprojects {
+    task checksum(type: Checksum)
+}
+// end::checksum_simple[]
+*/
+
+// tag::checksum_best[]
+allprojects {
+    task checksum(type: ChecksumImproved)
+}
+// end::checksum_best[]

@@ -17,6 +17,7 @@ class SourcesJarPlugin implements Plugin<Project> {
                     from sourceSet.allSource
                 }
                 sourcesJarTask.dependsOn(t)
+                project.artifacts.add("archives", t)
             }
         }
     }

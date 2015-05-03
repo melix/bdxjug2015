@@ -58,3 +58,4 @@ download {
 }
 
 apply from: 'gradle/asciidoctor.gradle'
+apply from: 'gradle/checksum.gradle'

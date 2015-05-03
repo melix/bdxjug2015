@@ -328,3 +328,35 @@ BUILD SUCCESSFUL
 
 Total time: 0.704 secs
 ----
+
+== Conventions evolved
+
+* the *model* is important
+* plugins can reason on the model rather than outputs
+
+=== Generating a checksum for all artifacts
+
+[source,groovy]
+----
+include::{basedir}/buildSrc/src/main/groovy/Checksum.groovy[]
+----
+
+=== Using the task
+
+[source,groovy]
+----
+include::{basedir}/gradle/checksum.gradle[tags=checksum_simple]
+----
+
+== Improving it
+
+* Each task can define its inputs/outputs
+* You should *always* do it
+
+=== Improved checksum
+
+[source,groovy]
+----
+include::{basedir}/buildSrc/src/main/groovy/ChecksumImproved.groovy[tags=improvement,indent=0]
+----
+
