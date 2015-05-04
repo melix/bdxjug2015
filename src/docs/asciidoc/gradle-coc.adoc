@@ -1,5 +1,5 @@
 = Convention over configuration: the Gradle way
-Cédric Champeau <cchampeau@gradleware.com>
+Cédric Champeau <http://twitter.com/CedricChampeau[@CedricChampeau]>
 2015-05-05
 :revnumber: {project-version}
 :example-caption!:
@@ -49,12 +49,20 @@ image::groovy-logo.png[]
 * A plugin system
 * A set of plugins
 
+== Gradle
+
+* Open Source
+* Language agnostic
+** builds Java, Groovy, Scala, C++, assembler, ...
+* Designed for extensions
+* Integrates well with Ivy, Ant, Maven, ...
+
 == About this slidedeck
 
 * Slides written using {adoctor}
 * Converted to {deckjs}
-* Integrated with {gradle}
 * Exported to PDF thanks to {deck2pdf}
+* Integrated with {gradle}
 
 [source,groovy]
 ----
@@ -79,12 +87,25 @@ include::{basedir}/gradle/pdf.gradle[]
 
 == Gradle basics
 
-[[gettysburg]]
+[[gradle-quote]]
 [quote, inspired by Moshe Feldenkrais]
 ____
 Make the impossible possible, +
 make the possible easy +
 and make the easy elegant
+____
+
+== First step : Gradle wrapper
+
+* Enforces a specific version of Gradle
+* Wrapper committed in VCS
+* Makes sure that the version of Gradle being used is the one the project is supposed to be compiled with
+* There's no good reason not to use it
+
+[[gradle-quote]]
+[quote, me]
+____
+Always use the wrapper. Always.
 ____
 
 == Convention over configuration
@@ -359,4 +380,102 @@ include::{basedir}/gradle/checksum.gradle[tags=checksum_simple]
 ----
 include::{basedir}/buildSrc/src/main/groovy/ChecksumImproved.groovy[tags=improvement,indent=0]
 ----
+
+== Convention over configuraton : versioning
+
+[source,groovy]
+----
+configurations.all {
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+        if (details.requested.version == 'default') {
+            def version = findDefaultVersionInCatalog(details.requested.group, details.requested.name)
+            details.useVersion version
+        }
+    }
+}
+----
+
+== A glance at the future
+
+=== Android build plugin
+
+[source,groovy]
+----
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 20
+    buildToolsVersion "20.0.0"
+
+    defaultConfig {
+        applicationId "com.mycompany.myapplication"
+        minSdkVersion 13
+        targetSdkVersion 20
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+         debug {
+            debuggable true
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:20.0.0'
+    compile project(path: ':app2, configuration: 'android-endpoints')
+}
+----
+
+== Defining your own model
+
+* A new model API is in the works
+* Allows definining custom models
+* Models can be shared between plugins
+* Allows faster build execution as well as parallel task execution
+
+=== Example
+
+[source,groovy]
+----
+@Managed
+interface Person {
+  void setFirstName(String n); String getFirstName()
+  void setLastName(String n); String getLastName()
+}
+
+class PersonRules extends RuleSource {
+  @Model void person(Person p) {}
+
+  @Mutate void setFirstName(Person p) {
+    p.firstName = "John"
+  }
+
+ @Mutate void createHelloTask(CollectionBuilder<Task> tasks, Person p) {
+    tasks.create("hello") {
+      doLast {
+        println "Hello $p.firstName $p.lastName!"
+      }
+    }
+  }
+}
+
+apply plugin: PersonRules
+----
+
+== Questions
+
+image::qa.png[]
+
+== Thank you!
+
+* Slides and code : https://github.com/melix/bdxjug2015
+* Gradle documentation : http://gradle.org/docs/current/userguide/userguide
+* Follow me: http://twitter.com/CedricChampeau[@CedricChampeau]
 

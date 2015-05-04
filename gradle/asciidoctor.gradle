@@ -25,6 +25,7 @@ asciidoctor {
             'idseparator': '-',
             'basedir': projectDir,
             'docinfo1': 'true',
+            'project-version': '1.0',
             'examples': file("${projectDir}/examples")
     //'deckjs_theme':'swiss'
 

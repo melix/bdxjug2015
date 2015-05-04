@@ -1,3 +1,6 @@
+apply plugin: 'java'
+apply plugin: 'groovy'
+
 // tag::use_plugin[]
 buildscript {
     repositories {
@@ -8,11 +11,9 @@ buildscript {
     }
 }
 
-//apply plugin: 'com.acme.sourcesjar'
+apply plugin: 'com.acme.sourcesjar'
 // end::use_plugin[]
 
-apply plugin: 'java'
-apply plugin: 'groovy'
 
 repositories {
     jcenter()
