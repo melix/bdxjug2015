@@ -12,9 +12,9 @@ task generatePdf(type:JavaExec) {
     dependsOn asciidoctor
     main = 'me.champeau.deck2pdf.Main'
     workingDir = file("$buildDir/asciidoc/deckjs")
-    args = ['gradle-coc.html','gradle-coc.pdf']
+    args = ['index.html','gradle-coc.pdf']
     classpath = configurations.pdf
 
-    inputs.file("$workingDir/gradle-coc.html")
+    inputs.file("$workingDir/index.html")
     outputs.file("$workingDir/gradle-coc.pdf")
 }

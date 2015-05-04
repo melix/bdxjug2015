@@ -1,7 +1,7 @@
 asciidoctor {
     dependsOn jrubyPrepareGems,download
     sources {
-        include 'gradle-coc.adoc'
+        include 'index.adoc'
     }
 
     resources {
