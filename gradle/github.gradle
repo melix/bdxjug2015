@@ -3,7 +3,7 @@ apply plugin: 'org.ajoberstar.github-pages'
 githubPages {
     repoUri = 'git@github.com:melix/bdxjug2015.git'
     pages {
-        from file("$buildDir/asciidoc/deckjs/deck.js")
+        from file("$buildDir/asciidoc/deckjs")
     }
 }
 
